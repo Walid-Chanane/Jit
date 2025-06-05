@@ -4,7 +4,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Optional;
 
 import org.ini4j.Ini;
 
@@ -79,11 +78,22 @@ public class Repository {
         Path headPath = repo_file(false, repository.jitDir, "HEAD");
         Files.writeString(headPath, head);
 
+        //create the config file
         Path configPath = repo_file(false, repository.jitDir, "config");
+        String configContent = repo_default_config().toString();
+        Files.writeString(configPath, configContent);
 
-        
     }
     
+    private static Ini repo_default_config(){
+        Ini conf = new Ini();
+        conf.add("core");
+        conf.add("core", "repositoryformatversion", 0);
+        conf.add("core", "filemode", "false");
+        conf.add("core", "bare", "false");
+        return conf;
+    }
+
     private static Path repo_file(boolean mkdir, Path path, String... subPaths) throws Exception{
         if(repo_dir(mkdir, path, Arrays.copyOf(subPaths, subPaths.length - 1)) != null){
             return Paths.get(path.toString(), subPaths.toString());

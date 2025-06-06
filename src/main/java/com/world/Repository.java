@@ -2,8 +2,6 @@ package com.world;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
 
 import org.ini4j.Ini;
 
@@ -21,17 +19,17 @@ public class Repository {
 
     public Repository(String path, Boolean force) throws Exception{
         // initialize repository's attributes
-        this.worktree = Paths.get(path);
-        this.jitDir = Paths.get(path, ".git");
+        this.worktree = Path.of(path);
+        this.jitDir = Path.of(path, ".jit");
         if(force == null) force = false;
 
-        // check if .git directory exists
+        // check if .jit directory exists
         if(!force && !Files.isDirectory(this.jitDir)){
-          throw new Exception("this is not a git repository");
+          throw new Exception("this is not a jit repository");
         }
 
         // create/read the config file
-        Path configPath = Paths.get(this.jitDir.toString(), "config");
+        Path configPath = Path.of(this.jitDir.toString(), "config");
         if (Files.exists(configPath)) {
             if(Files.isRegularFile(configPath)) {
                 this.config = new Ini();
@@ -63,55 +61,36 @@ public class Repository {
         }
 
         // check the subdirectories, if non existant, create them
-        assert repo_dir(true, repository.jitDir, "branches") != null;
-        assert repo_dir(true, repository.jitDir, "objects") != null;
-        assert repo_dir(true, repository.jitDir, "refs", "tags") != null;
-        assert repo_dir(true, repository.jitDir, "refs", "heads") != null;
+        Files.createDirectories(Path.of(repository.jitDir.toString(), "branches" ));
+        Files.createDirectories(Path.of(repository.jitDir.toString(), "objects" ));
+        Files.createDirectories(Path.of(repository.jitDir.toString(), "refs", "tags" ));
+        Files.createDirectories(Path.of(repository.jitDir.toString(), "refs", "heads" ));
 
         // create description file
-        String description = "unnamed repository, edit the description file to name the repository!";
-        Path descriptionPath = repo_file(false, repository.jitDir, "description");
+        String description = "unnamed repository, edit the description file to name the repository!\n";
+        Path descriptionPath = Path.of(repository.jitDir.toString(), "description");
         Files.writeString(descriptionPath, description);
         
         //create HEAD file
         String head = "ref: refs/heads/master\n";
-        Path headPath = repo_file(false, repository.jitDir, "HEAD");
+        Path headPath = Path.of(repository.jitDir.toString(), "HEAD");
         Files.writeString(headPath, head);
-
+        
         //create the config file
-        Path configPath = repo_file(false, repository.jitDir, "config");
+        Path configPath = Path.of(repository.jitDir.toString(), "config");
         String configContent = repo_default_config().toString();
         Files.writeString(configPath, configContent);
 
     }
     
+    //returns a default config file
     private static Ini repo_default_config(){
         Ini conf = new Ini();
         conf.add("core");
         conf.add("core", "repositoryformatversion", 0);
-        conf.add("core", "filemode", "false");
-        conf.add("core", "bare", "false");
+        conf.add("core", "filemode", false);
+        conf.add("core", "bare", false);
         return conf;
     }
 
-    private static Path repo_file(boolean mkdir, Path path, String... subPaths) throws Exception{
-        if(repo_dir(mkdir, path, Arrays.copyOf(subPaths, subPaths.length - 1)) != null){
-            return Paths.get(path.toString(), subPaths.toString());
-        }
-        return null;
-    }
-
-    private static Path repo_dir(boolean mkdir, Path path, String... subPaths) throws Exception{
-        Path completePath = Paths.get(path.toString(), subPaths);
-        if (Files.exists(completePath)){
-            if (Files.isDirectory(completePath)){
-                return completePath;
-            }else throw new Exception(completePath + " is not a directory!");
-        }
-
-        if (mkdir) {
-            Files.createDirectories(completePath);
-            return completePath;
-        } else return null;
-    }
 }

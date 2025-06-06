@@ -6,17 +6,25 @@ import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
+import net.sourceforge.argparse4j.inf.Subparser;
 import net.sourceforge.argparse4j.inf.Subparsers;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception{
         ArgumentParser parser = ArgumentParsers.newFor("jit").build()
             .description("am i really writing git in java ?");
         Subparsers subparsers = parser.addSubparsers().title("Command").dest("command");
 
+        //the init parser
+        Subparser argsParser = subparsers.addParser("init").help("Initialize a new jit repository");
+        argsParser.addArgument("path")
+                    .setDefault(".")
+                    .metavar("directory")
+                    .nargs("?")
+                    .help("the path where to initialize the jit repository");
+
         Namespace ns = null;
         try {
-            ns = parser.parseArgs(Arrays.copyOfRange(args, 1, args.length));
             ns = parser.parseArgs(Arrays.copyOfRange(args, 1, args.length));
         } catch (ArgumentParserException e) {
             parser.handleError(e);
@@ -30,54 +38,58 @@ public class Main {
         }
 
         switch (ns.getString("command")) {
-            case "add":
-                cmd_add(args);
-                break;
-            case "catfile":
-                cmd_catfile(args);
-                break;
-            case "check-ignore":
-                cmd_check_ignore(args);
-                break;
-            case "checkout":
-                cmd_checkout(args);
-                break;
-            case "commit":
-                cmd_commit(args);
-                break;
-            case "hash-object":
-                cmd_hash_object(args);
-                break;
+            // case "add":
+                // cmd_add(args);
+                // break;
+            // case "catfile":
+            //     cmd_catfile(args);
+            //     break;
+            // case "check-ignore":
+            //     cmd_check_ignore(args);
+            //     break;
+            // case "checkout":
+            //     cmd_checkout(args);
+            //     break;
+            // case "commit":
+            //     cmd_commit(args);
+            //     break;
+            // case "hash-object":
+            //     cmd_hash_object(args);
+            //     break;
             case "init":
-                cmd_init(args);
+                cmd_init(ns.getString("path"));
                 break;
-            case "log":
-                cmd_log(args);
-                break;
-            case "ls-files":
-                cmd_ls_files(args);
-                break;
-            case "ls-tree":
-                cmd_ls_tree(args);
-                break;
-            case "rev-parse":
-                cmd_rev_parse(args);
-                break;
-            case "rm":
-                cmd_rm(args);
-                break;
-            case "show-ref":
-                cmd_show_ref(args);
-                break;
-            case "status":
-                cmd_status(args);
-                break;
-            case "tag":
-                cmd_tag(args);
-                break;
+            // case "log":
+            //     cmd_log(args);
+            //     break;
+            // case "ls-files":
+            //     cmd_ls_files(args);
+            //     break;
+            // case "ls-tree":
+            //     cmd_ls_tree(args);
+            //     break;
+            // case "rev-parse":
+            //     cmd_rev_parse(args);
+            //     break;
+            // case "rm":
+            //     cmd_rm(args);
+            //     break;
+            // case "show-ref":
+            //     cmd_show_ref(args);
+            //     break;
+            // case "status":
+            //     cmd_status(args);
+            //     break;
+            // case "tag":
+            //     cmd_tag(args);
+            //     break;
             default:
                 System.out.println("Bad command!");
                 break;
         }
+    }
+
+    private static void cmd_init(String path) throws Exception{
+        Repository.createRepository(path);
     }
 }

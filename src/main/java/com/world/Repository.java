@@ -93,4 +93,29 @@ public class Repository {
         return conf;
     }
 
+    // find the root directory of the current jit repository
+    private static Repository findRepository(Path path, Boolean required) throws Exception{
+        if (path == null) path = Path.of(".");
+        if (required == null) required = false;
+
+        path = path.toAbsolutePath();
+
+        // if the directory contains the jit directory then it is the root of the repository
+        if(Files.isDirectory(Path.of(path.toString(), ".jit"))){
+            return new Repository(path.toString(), false);
+        }
+
+        // if the parent is the same as the path it means we are in the root directory, there is no parent
+        Path parent = Path.of(path.toString(), "..");
+        if (parent == path){
+            if (required){
+                throw new Exception("yo wtf");
+            } else {
+                return null;
+            }
+        }
+
+        // check the predecessors
+        return findRepository(path, required);
+    }
 }

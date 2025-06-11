@@ -116,6 +116,6 @@ public class Repository {
         }
 
         // check the predecessors
-        return findRepository(path, required);
+        return findRepository(parent, required);
     }
 }
